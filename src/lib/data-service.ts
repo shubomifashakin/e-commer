@@ -1,3 +1,5 @@
+import { CatalogResults, UserInfo } from "./type";
+
 //getters
 export async function getUserInfo(): Promise<UserInfo> {
   const req = await fetch("http://localhost:3000/user");
@@ -24,23 +26,3 @@ export async function getCatalog(pageParams: number): Promise<CatalogResults> {
 
   return data;
 }
-
-type UserInfo = {
-  firstName: string;
-  lastName: string;
-  email: string;
-};
-
-export type Product = {
-  name: string;
-  price: number;
-  image: string;
-  id: string;
-};
-
-export type CatalogResults = {
-  data: Product[];
-  paginationDetails: {
-    nextCursor: number;
-  };
-};

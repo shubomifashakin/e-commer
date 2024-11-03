@@ -1,13 +1,30 @@
 import { create } from "zustand";
+import { CartInfo } from "./type";
 
 export const cartStore = create<CartInfo>((set) => ({
   items: [],
 
   addToCart: (product) =>
-    set((state) => ({ items: [...state.items, product] })),
+    set((state) => {
+      const productExists = state.items.find((item) => item.id === product.id);
+
+      if (productExists) {
+        return {
+          items: state.items.map((item) =>
+            item.id === product.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          ),
+        };
+      } else {
+        return { items: [...state.items, { ...product, quantity: 1 }] };
+      }
+    }),
 
   removeFromCart: (productId) =>
-    set((state) => ({ items: state.items.filter((c) => c.id === productId) })),
+    set((state) => ({
+      items: state.items.filter((item) => item.id !== productId),
+    })),
 
   clearCart: () => set(() => ({ items: [] })),
 
@@ -17,20 +34,13 @@ export const cartStore = create<CartInfo>((set) => ({
         item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
       ),
     })),
+
+  decrementItemQuantity: (itemId) =>
+    set((state) => ({
+      items: state.items
+        .map((item) =>
+          item.id === itemId ? { ...item, quantity: item.quantity - 1 } : item
+        )
+        .filter((item) => item.quantity > 0), // Remove items with quantity 0
+    })),
 }));
-
-type CartInfo = {
-  items: CartItem[];
-  addToCart: (item: CartItem) => void;
-  removeFromCart: (productId: string) => void;
-  clearCart: () => void;
-  incrementItemQuantity: (itemId: string) => void;
-};
-
-type CartItem = {
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  id: string;
-};

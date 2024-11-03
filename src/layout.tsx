@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 export default function Layout() {
   //fetch user info
-  const { status, data, error } = useQuery({
+  const { status, data, error, refetch } = useQuery({
     queryKey: ["userinfo"],
     queryFn: getUserInfo,
   });
@@ -19,7 +19,7 @@ export default function Layout() {
 
   return (
     <div className={"h-dvh flex flex-col"}>
-      <nav className="flex justify-between p-6">
+      <nav className="flex justify-between px-10 py-5">
         <NavLink to="/profile">
           Welcome&nbsp;
           {status === "pending" && "Loading"}
@@ -27,7 +27,7 @@ export default function Layout() {
           {status === "error" && "error"}
         </NavLink>
 
-        <div className="flex gap-x-5">
+        <div className="flex gap-x-8">
           {/* change to icons, lottie for the cart */}
           <NavLink to="/catalog">Catalog</NavLink>
 

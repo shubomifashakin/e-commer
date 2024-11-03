@@ -38,7 +38,7 @@ export default function Page() {
       navigate("/catalog");
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
-        // Handle validation errors
+        // toast the error
         console.log("Validation errors:", error.errors);
       }
 

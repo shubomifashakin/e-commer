@@ -14,3 +14,7 @@
 body {
   @apply font-poppins bg-primary text-white;
 }
+
+.active {
+  @apply text-blue-500;
+}
