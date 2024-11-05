@@ -30,8 +30,8 @@ export interface UserInfo {
 export interface CatalogResults {
   catalog: Product[];
   paginationDetails: {
-    nextCursor: number;
-    previousCursor: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
   };
 }
 

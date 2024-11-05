@@ -8,6 +8,7 @@ import { useSession } from "../hooks/useSession";
 import { cartStore } from "../lib/cartStore";
 import { CartItem } from "../lib/type";
 import { placeOrderFunction } from "../lib/data-service";
+
 import Button from "../components/Button";
 
 export default function Page() {

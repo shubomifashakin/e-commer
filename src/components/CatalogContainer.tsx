@@ -6,10 +6,8 @@ import Error from "./Error";
 
 export default function CatalogContainer({
   infiniteQueryObj,
-  search,
 }: {
   infiniteQueryObj: UseInfiniteQueryResult<CatalogResults, Error>;
-  search: string;
 }) {
   const {
     data,

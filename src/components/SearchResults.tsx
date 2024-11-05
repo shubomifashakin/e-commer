@@ -5,6 +5,7 @@ import { CatalogResults } from "../lib/type";
 import Error from "./Error";
 import Catalog from "./Catalog";
 import Pagination from "./Pagination";
+import { useRef } from "react";
 
 export default function SearchResults({
   mutationObj,
@@ -12,25 +13,32 @@ export default function SearchResults({
 }: SearchResultTypes) {
   const { data, mutate, error, isPending, status, isError } = mutationObj;
 
+  const cursor = useRef<number>(1);
+
   return (
     <>
       {status === "success" && (
         <>
           <Pagination
-            hasNextPage={data.paginationDetails?.nextCursor ? true : false}
+            hasNextPage={data.paginationDetails?.hasNextPage ? true : false}
             hasPreviousPage={
-              data.paginationDetails?.previousCursor ? true : false
+              data.paginationDetails?.hasPreviousPage ? true : false
             }
             fetchNextPage={function () {
+              cursor.current = cursor.current + 1;
+
               mutate({
                 search,
-                cursor: data.paginationDetails.nextCursor,
+                cursor: cursor.current,
               });
             }}
             fetchPreviousPage={function () {
+              cursor.current =
+                cursor.current > 1 ? cursor.current - 1 : cursor.current;
+
               mutate({
                 search,
-                cursor: data.paginationDetails.previousCursor,
+                cursor: cursor.current,
               });
             }}
             isPending={isPending}

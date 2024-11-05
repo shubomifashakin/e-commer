@@ -17,15 +17,24 @@ export default function Page() {
 
     initialPageParam: 1,
 
-    getNextPageParam: (lastPage) => lastPage.paginationDetails.nextCursor,
+    getNextPageParam: (lastPage, _, lastPageParam) => {
+      if (lastPage.paginationDetails.hasNextPage) {
+        return lastPageParam + 1;
+      }
+    },
 
-    getPreviousPageParam: (lastpage) =>
-      lastpage.paginationDetails.previousCursor,
+    getPreviousPageParam: (firstPage, _, firstPageParam) => {
+      if (firstPage.paginationDetails.hasPreviousPage && firstPageParam > 1) {
+        return firstPageParam - 1;
+      }
+    },
 
     select: (data) => {
       //always return the last data fetched
       return data.pages[data.pages.length - 1];
     },
+
+    maxPages: 1,
   });
 
   //fetches the searched product
@@ -57,10 +66,7 @@ export default function Page() {
           <div className="space-y-2 w-full flex flex-col">
             {/*renders when the search is <= 3 */}
             {search.length < 3 && (
-              <CatalogContainer
-                infiniteQueryObj={infiniteQueryObj}
-                search={search}
-              />
+              <CatalogContainer infiniteQueryObj={infiniteQueryObj} />
             )}
 
             {/*renders when the length of search chars is >= 3  */}
