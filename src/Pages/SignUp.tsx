@@ -1,77 +1,58 @@
 import { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
 
 import { InputGroup } from "../components/InputGroup";
 
-const details = z
-  .object({
-    email: z.string().email(),
-    firstName: z.string(),
-    lastName: z.string(),
-    password: z.string().min(8, "at least 8 characters"),
-    verifyPassword: z.string().min(8, "at least 8 characters"),
-  })
-  .refine((data) => data.password === data.verifyPassword, {
-    message: "Passwords do not match",
-    path: ["verifyPassword"],
-  });
+import { signUpFunction } from "../lib/data-service";
+import Button from "../components/Button";
+import { flushSync } from "react-dom";
 
 export default function Page() {
   const navigate = useNavigate();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: signUpFunction,
+
+    onSuccess: () => {
+      document.startViewTransition(() => {
+        flushSync(() => {
+          navigate("/catalog");
+        });
+      });
+    },
+
+    onError: (error) => {
+      //toast the error
+      console.log(error.message);
+    },
+  });
 
   //submit function
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email");
-    const firstName = formData.get("firstName");
-    const lastName = formData.get("lastName");
-    const password = formData.get("password");
-    const verifyPassword = formData.get("verifyPassword");
+    const email = formData.get("email") as string | null;
+    const firstName = formData.get("firstName") as string | null;
+    const lastName = formData.get("lastName") as string | null;
+    const password = formData.get("password") as string | null;
+    const verifyPassword = formData.get("verifyPassword") as string | null;
 
-    try {
-      //validate the data being sent
-      details.parse({
-        email,
-        password,
-        lastName,
-        firstName,
-        verifyPassword,
-      });
+    if (!email || !password || !verifyPassword || !lastName || !firstName)
+      return;
 
-      //try submitting the data
-      const req = await fetch("http://localhost:3000/user", {
-        method: "POST",
-        body: JSON.stringify({ email, password, lastName, firstName }),
-      });
-
-      if (!req.ok) {
-        throw new Error(`An Error occurred ${req.statusText}`);
-      }
-
-      //go to redirect page if a redirect was specified
-      //if not, go to catalog page
-      navigate("/catalog");
-    } catch (error: unknown) {
-      if (error instanceof z.ZodError) {
-        // Handle validation errors
-        console.log("Validation errors:", error.errors);
-      }
-
-      console.log(error);
-    }
+    mutate({ email, firstName, lastName, password, verifyPassword });
   }
 
   return (
     <div className="h-dvh flex items-center justify-center">
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 bg-secondary   p-4 rounded-md"
+        className="space-y-5 bg-secondary  p-5 rounded-sm"
       >
-        <div className="flex gap-x-4">
+        <div className="flex gap-x-5">
           <InputGroup
             label="First Name"
             name="firstName"
@@ -108,9 +89,9 @@ export default function Page() {
           placeholder="Please enter your password again"
         />
 
-        <button className="rounded-sm bg-" type="submit">
+        <Button disabled={isPending} type="submit">
           Submit
-        </button>
+        </Button>
       </form>
     </div>
   );

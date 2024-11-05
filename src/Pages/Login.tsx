@@ -1,57 +1,63 @@
 import { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+
+import { loginFunction } from "../lib/data-service";
+
 import { InputGroup } from "../components/InputGroup";
-
-const details = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
+import Button from "../components/Button";
+import { flushSync } from "react-dom";
 
 export default function Page() {
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get("redirect_url");
+
   const navigate = useNavigate();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: loginFunction,
+
+    onSuccess: () => {
+      if (redirectUrl) {
+        document.startViewTransition(() => {
+          flushSync(() => {
+            navigate(`/${redirectUrl}`);
+          });
+        });
+      } else {
+        document.startViewTransition(() => {
+          flushSync(() => {
+            navigate("/catalog");
+          });
+        });
+      }
+    },
+
+    onError: (error) => {
+      //toast the error
+      console.log(error.message);
+    },
+  });
 
   //submit function
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    const email = formData.get("email") as string | null;
+    const password = formData.get("password") as string | null;
 
-    try {
-      const validatedData = details.parse({ email, password });
+    if (!email || !password) return;
 
-      //try submitting the data
-      const req = await fetch("http://localhost:3000/login", {
-        method: "POST",
-        body: JSON.stringify(validatedData),
-      });
-
-      if (!req.ok) {
-        throw new Error(`An Error occurred ${req.statusText}`);
-      }
-
-      //go to redirect page if any
-      //if not, go to catalog page
-      navigate("/catalog");
-    } catch (error: unknown) {
-      if (error instanceof z.ZodError) {
-        // toast the error
-        console.log("Validation errors:", error.errors);
-      }
-
-      //handle server errors, like wrong passwords/email && timeouts
-      console.log(error);
-    }
+    mutate({ email, password });
   }
 
   return (
     <div className="h-dvh bg-primary flex items-center justify-center">
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 bg-secondary  w-1/2 p-2 rounded-md"
+        className="space-y-5 bg-secondary border  w-1/2 px-4 py-6 rounded-sm"
       >
         <InputGroup
           label="Email"
@@ -67,7 +73,9 @@ export default function Page() {
           placeholder="Please enter your password"
         />
 
-        <button type="submit">Submit</button>
+        <Button disabled={isPending} type={"submit"}>
+          {isPending ? "Logging In" : "Log In"}
+        </Button>
       </form>
     </div>
   );

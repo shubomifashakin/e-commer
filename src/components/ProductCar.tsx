@@ -1,5 +1,7 @@
+import { flushSync } from "react-dom";
 import { cartStore } from "../lib/cartStore";
 import { Product } from "../lib/type";
+import Button from "./Button";
 
 export default function ProductCard({ details }: { details: Product }) {
   const { price, name, description, image, id } = details;
@@ -9,6 +11,14 @@ export default function ProductCard({ details }: { details: Product }) {
 
   const totalQuantityOfItemInCart =
     items.find((c) => c.id === id)?.quantity || 0;
+
+  function addItemToCart() {
+    document.startViewTransition(() => {
+      flushSync(() => {
+        addToCart(details);
+      });
+    });
+  }
 
   return (
     <div className=" w-48 border bg-secondary space-y-1 h-fit p-2 rounded-sm">
@@ -23,14 +33,10 @@ export default function ProductCard({ details }: { details: Product }) {
 
         <p className="text-xs">${price}</p>
 
-        <button
-          type="button"
-          className="text-xs py-2 hover:bg-white hover:text-black font-semibold transition-all duration-500 w-full border rounded-sm p-1"
-          onClick={() => addToCart(details)}
-        >
+        <Button onClickFn={addItemToCart} type={"button"}>
           Add To Cart{" "}
           {totalQuantityOfItemInCart ? `(${totalQuantityOfItemInCart}) ` : ""}
-        </button>
+        </Button>
       </div>
     </div>
   );

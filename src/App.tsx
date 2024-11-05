@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LoginPage from "./Pages/Login";
 import SignupPage from "./Pages/SignUp";
 import CatalogPage from "./Pages/Catalog";
+import ProfilePage from "./Pages/Profile";
 import CartPage from "./Pages/Cart";
 import HistoryPage from "./Pages/History";
 import Layout from "./layout";
@@ -14,11 +15,11 @@ const queryClient = new QueryClient({
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/login",
     element: <LoginPage />,
   },
   {
-    path: "/signUp",
+    path: "/",
     element: <SignupPage />,
   },
   {
@@ -30,7 +31,7 @@ const router = createBrowserRouter([
       },
       {
         path: "profile",
-        element: <CatalogPage />,
+        element: <ProfilePage />,
       },
       {
         path: "cart",

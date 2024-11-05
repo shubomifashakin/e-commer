@@ -16,5 +16,9 @@ body {
 }
 
 .active {
-  @apply text-blue-500;
+  @apply text-stone-300;
+}
+
+a {
+  @apply hover:text-stone-300 duration-500 ease-linear;
 }

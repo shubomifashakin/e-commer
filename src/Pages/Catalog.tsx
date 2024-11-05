@@ -1,55 +1,76 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 
-import Catalog from "../components/Catalog";
+import SearchResults from "../components/SearchResults";
 
-import { getCatalog } from "../lib/data-service";
+import { getCatalog, getSearchCatalog } from "../lib/data-service";
+import CatalogContainer from "../components/CatalogContainer";
 
 export default function Page() {
   const [search, setSearch] = useState<string>("");
 
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    status,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey: ["projects"],
+  //fetches the first 10 products on mount and select only the latest fetched data
+  const infiniteQueryObj = useInfiniteQuery({
+    queryKey: ["products"],
+
     queryFn: ({ pageParam }) => getCatalog(pageParam),
-    initialPageParam: 0,
+
+    initialPageParam: 1,
+
     getNextPageParam: (lastPage) => lastPage.paginationDetails.nextCursor,
+
+    getPreviousPageParam: (lastpage) =>
+      lastpage.paginationDetails.previousCursor,
+
+    select: (data) => {
+      //always return the last data fetched
+      return data.pages[data.pages.length - 1];
+    },
   });
 
-  //debounce the fetching
+  //fetches the searched product
+  const { mutate, ...mutationObj } = useMutation({
+    mutationKey: ["search-products"],
+    mutationFn: getSearchCatalog,
+  });
+
+  //debounce the mutation
+  //fetches the searched product everytime user finishes typing
   useEffect(
     function () {
       const timeoutId = setTimeout(function () {
         //fetch the data
-        console.log(search);
-      }, 1500);
+        mutate({ search });
+      }, 500);
 
       return () => clearTimeout(timeoutId);
     },
-    [search]
+    [search, mutate]
   );
 
   return (
-    <div className="h-dvh w-full flex py-6 px-10 justify-center items-center flex-grow">
+    <div className="h-dvh w-full py-6 px-10 ">
       <div className="w-full h-full gap-y-2 flex flex-col items-center ">
         <SearchBar search={search} setSearch={setSearch} />
 
-        <div className="flex items-center justify-center flex-grow">
-          {status === "success" &&
-            data.pages.map((page, i) => {
-              return <Catalog catalog={page.data} key={i} />;
-            })}
+        <div className="flex w-full  flex-grow">
+          <div className="space-y-2 w-full flex flex-col">
+            {/*renders when the search is <= 3 */}
+            {search.length < 3 && (
+              <CatalogContainer
+                infiniteQueryObj={infiniteQueryObj}
+                search={search}
+              />
+            )}
 
-          {status === "pending" && <p>Loading..</p>}
-
-          {status === "error" && <p>{error.message}</p>}
+            {/*renders when the length of search chars is >= 3  */}
+            {search.length >= 3 && (
+              <SearchResults
+                search={search}
+                mutationObj={{ mutate, ...mutationObj }}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

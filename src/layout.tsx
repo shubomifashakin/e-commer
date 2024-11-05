@@ -1,15 +1,21 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { NavLink, Outlet } from "react-router-dom";
+
 import { getUserInfo } from "./lib/data-service";
 import { cartStore } from "./lib/cartStore";
-import { useEffect } from "react";
+
+import { useSession } from "./hooks/useSession";
 
 export default function Layout() {
   //fetch user info
-  const { status, data, error, refetch } = useQuery({
+  const { status, data } = useQuery({
     queryKey: ["userinfo"],
     queryFn: getUserInfo,
   });
+
+  //gets the user session from the cookie
+  const sessionToken = useSession();
 
   //get the amount ofitems in cart
   const cartQuantity = cartStore((state) => state.items.length);
@@ -20,20 +26,29 @@ export default function Layout() {
   return (
     <div className={"h-dvh flex flex-col"}>
       <nav className="flex justify-between px-10 py-5">
-        <NavLink to="/profile">
-          Welcome&nbsp;
-          {status === "pending" && "Loading"}
-          {status === "success" && <span>{data[0].lastName}</span>}
-          {status === "error" && "error"}
-        </NavLink>
+        {sessionToken ? (
+          <NavLink viewTransition to="/profile">
+            Welcome&nbsp;
+            {status === "pending" && "Loading"}
+            {status === "success" && <span>{data.lastName}</span>}
+          </NavLink>
+        ) : (
+          <NavLink viewTransition to={"/login"}>
+            Log In
+          </NavLink>
+        )}
 
         <div className="flex gap-x-8">
           {/* change to icons, lottie for the cart */}
-          <NavLink to="/catalog">Catalog</NavLink>
+          <NavLink viewTransition to="/catalog">
+            Catalog
+          </NavLink>
 
-          <NavLink to="/cart">Cart {cartQuantity}</NavLink>
+          <NavLink viewTransition to="/cart">
+            Cart {cartQuantity || ""}
+          </NavLink>
 
-          <NavLink to="/logOut">Log Out</NavLink>
+          {sessionToken && <NavLink to="/logOut">Log Out</NavLink>}
         </div>
       </nav>
 
