@@ -49,7 +49,7 @@ export default function SearchResults({
             {data.catalog.length ? (
               <Catalog catalog={data.catalog} />
             ) : (
-              <p>No Product Found</p>
+              <p className="text-sm">No Product Found</p>
             )}
           </div>
         </>

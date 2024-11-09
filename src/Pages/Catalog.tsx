@@ -66,25 +66,23 @@ export default function Page() {
   );
 
   return (
-    <div className="h-dvh w-full py-6 px-10 ">
-      <div className="w-full h-full gap-y-2 flex flex-col items-center ">
-        <SearchBar search={search} setSearch={setSearch} />
+    <div className="w-full h-full gap-y-2 flex flex-col items-center ">
+      <SearchBar search={search} setSearch={setSearch} />
 
-        <div className="flex w-ful flex-grow">
-          <div className="space-y-2 w-full p-4 flex flex-col items-center justify-center">
-            {/* renders when the search is <= 3 */}
-            {search.length < 3 && (
-              <CatalogContainer infiniteQueryObj={infiniteQueryObj} />
-            )}
+      <div className="flex w-ful flex-grow">
+        <div className="space-y-2 w-full p-4 flex flex-col items-center justify-center">
+          {/* renders when the search is <= 3 */}
+          {search.length < 3 && (
+            <CatalogContainer infiniteQueryObj={infiniteQueryObj} />
+          )}
 
-            {/* renders when the length of search chars is >= 3  */}
-            {search.length >= 3 && (
-              <SearchResults
-                search={search}
-                mutationObj={{ mutate, ...mutationObj }}
-              />
-            )}
-          </div>
+          {/* renders when the length of search chars is >= 3  */}
+          {search.length >= 3 && (
+            <SearchResults
+              search={search}
+              mutationObj={{ mutate, ...mutationObj }}
+            />
+          )}
         </div>
       </div>
     </div>

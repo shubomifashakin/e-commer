@@ -1,6 +1,6 @@
 import { flushSync } from "react-dom";
 import { FormEvent } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 
 import { useMutation } from "@tanstack/react-query";
 
@@ -24,19 +24,15 @@ export default function Page() {
     mutationFn: loginFunction,
 
     onSuccess: () => {
-      if (redirectUrl) {
-        document.startViewTransition(() => {
-          flushSync(() => {
+      document.startViewTransition(() => {
+        flushSync(() => {
+          if (redirectUrl) {
             navigate(`/${redirectUrl}`);
-          });
+          } else {
+            navigate("/");
+          }
         });
-      } else {
-        document.startViewTransition(() => {
-          flushSync(() => {
-            navigate("/catalog");
-          });
-        });
-      }
+      });
     },
 
     onError: (error) => {
@@ -77,6 +73,13 @@ export default function Page() {
       <Button disabled={isPending} type={"submit"}>
         {isPending ? "Logging In" : "Log In"}
       </Button>
+
+      <p className="text-xs text-center">
+        You don't have an account?&nbsp;
+        <NavLink className="underline " to={"/signUp"}>
+          Sign Up
+        </NavLink>
+      </p>
     </Form>
   );
 }

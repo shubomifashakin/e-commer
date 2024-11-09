@@ -21,15 +21,17 @@ export default function ProductCard({ details }: { details: Product }) {
   }
 
   return (
-    <div className=" w-48 border bg-secondary space-y-1 h-fit p-2 rounded-sm">
+    <div className=" w-48 border bg-secondary space-y-1 h-80 p-2 rounded-sm">
       <div className="w-full overflow-hidden rounded-sm h-1/2">
         <img className="object-cover" src={image} alt="an image" />
       </div>
 
-      <div className="space-y-2.5">
+      <div className="flex flex-col justify-between h-1/2 py-2.5">
         <p className="text-sm">{name}</p>
 
-        <p className="text-xs">{description}</p>
+        <p className="text-xs text-ellipsis text-nowrap overflow-hidden">
+          {description}
+        </p>
 
         <p className="text-xs">${price}</p>
 

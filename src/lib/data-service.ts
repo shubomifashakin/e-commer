@@ -14,14 +14,13 @@ const origin = "http://localhost:3000";
 
 //getters
 export async function getUserInfo(): Promise<UserInfo> {
-  const req = await fetch(`${origin}/user`);
+  const req = await fetch(`${origin}/users/me`, { credentials: "include" });
 
   if (!req.ok) {
     throw new Error(`An error occurred ${req.statusText}`);
   }
 
   const data = await req.json();
-
   return data;
 }
 
@@ -33,7 +32,6 @@ export async function getCatalog(pageParams: number): Promise<CatalogResults> {
   }
 
   const data = await req.json();
-  console.log(data);
 
   return data;
 }
@@ -56,12 +54,6 @@ export async function loginFunction(params: logInDetailsTypes) {
     const message = await req.json();
     throw new Error(message);
   }
-
-  //user data is returned
-  const data = await req.json();
-
-  //store it in the session
-  sessionStorage.setItem("user-info", JSON.stringify(data));
 }
 
 export async function signUpFunction(params: signUpDetailsTypes) {
@@ -85,10 +77,6 @@ export async function signUpFunction(params: signUpDetailsTypes) {
 
     throw new Error(message);
   }
-
-  const data = await req.json();
-
-  sessionStorage.setItem("user-info", JSON.stringify(data));
 }
 
 export async function logOutFn() {

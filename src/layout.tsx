@@ -1,24 +1,31 @@
 import { useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { AiFillProduct } from "react-icons/ai";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+
+import { AiFillProduct } from "react-icons/ai";
 
 import { useLottie } from "lottie-react";
 import animationData from "./lottie/Animation - 1731052331681.json";
 
 import Button from "./components/Button";
-import { useSession } from "./hooks/useSession";
+import LoadingSpinner from "./components/LoadingSpinner";
+
 import { cartStore } from "./lib/cartStore";
-import { logOutFn } from "./lib/data-service";
+import { getUserInfo, logOutFn } from "./lib/data-service";
 
 export default function Layout() {
   const navigate = useNavigate();
 
-  //gets the user session from the cookie
-  const [userInfo, setUserInfo] = useSession();
+  const queryClient = useQueryClient();
 
-  //get the amount ofitems in cart
+  //fetch the users profile
+  const { data, status, isFetching } = useQuery({
+    queryKey: ["user-info"],
+    queryFn: getUserInfo,
+  });
+
+  //get the amount of items in the cart
   const cartQuantity = cartStore((state) => state.items.length);
 
   //lottie
@@ -28,7 +35,7 @@ export default function Layout() {
       loop: false,
       autoplay: false,
     },
-    { height: 40, width: 40, color: "#fc3" }
+    { height: 40, width: 40 }
   );
 
   //play the lottie everytime a new item gets added to cart
@@ -44,8 +51,8 @@ export default function Layout() {
     mutationFn: logOutFn,
 
     onSuccess: () => {
-      setUserInfo(null);
-      navigate("/catalog");
+      queryClient.invalidateQueries({ queryKey: ["user-info"] });
+      navigate("/");
     },
 
     onError: (error) => {
@@ -56,19 +63,22 @@ export default function Layout() {
   return (
     <div className={"h-dvh flex flex-col"}>
       <nav className="flex justify-between items-center px-10 py-5">
-        {userInfo ? (
+        {status === "success" && !isFetching && (
           <NavLink viewTransition to="/profile">
-            Welcome, <span>{userInfo.last_name}</span>
+            Welcome, <span>{data.last_name}</span>
           </NavLink>
-        ) : (
+        )}
+
+        {isFetching && <LoadingSpinner size="20px" />}
+
+        {status === "error" && !isFetching && (
           <NavLink viewTransition to={"/login"}>
             Log In
           </NavLink>
         )}
 
         <div className="flex gap-x-8 items-center">
-          {/* change to icons, lottie for the cart */}
-          <NavLink className={"text-blue-500"} viewTransition to="/catalog">
+          <NavLink className={"text-blue-500"} viewTransition to="/">
             <AiFillProduct className="text-3xl text-inherit" color="#52CC99" />
           </NavLink>
 
@@ -77,15 +87,20 @@ export default function Layout() {
             {View}
           </NavLink>
 
-          {userInfo && (
-            <Button disabled={isPending} onClickFn={() => mutate()}>
+          {status === "success" && (
+            <Button
+              disabled={isPending || isFetching}
+              onClickFn={() => mutate()}
+            >
               Log Out
             </Button>
           )}
         </div>
       </nav>
 
-      <Outlet />
+      <div className="h-dvh py-4 px-10 ">
+        <Outlet />
+      </div>
     </div>
   );
 }

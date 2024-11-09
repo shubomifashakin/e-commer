@@ -1,4 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { Toaster } from "react-hot-toast";
 import LoginPage from "./Pages/Login";
 import SignupPage from "./Pages/SignUp";
 import CatalogPage from "./Pages/Catalog";
@@ -6,12 +9,12 @@ import ProfilePage from "./Pages/Profile";
 import CartPage from "./Pages/Cart";
 import HistoryPage from "./Pages/History";
 import Layout from "./layout";
-
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "react-hot-toast";
+import ProtectedRoute from "./components/Protected";
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { refetchOnWindowFocus: false } },
+  defaultOptions: {
+    queries: { refetchOnWindowFocus: false, staleTime: Infinity },
+  },
 });
 
 const router = createBrowserRouter([
@@ -20,19 +23,23 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: "/",
+    path: "/signup",
     element: <SignupPage />,
   },
   {
     element: <Layout />,
     children: [
       {
-        path: "catalog",
+        path: "/",
         element: <CatalogPage />,
       },
       {
         path: "profile",
-        element: <ProfilePage />,
+        element: (
+          <ProtectedRoute redirectUrl="profile">
+            <ProfilePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "cart",
@@ -40,7 +47,11 @@ const router = createBrowserRouter([
       },
       {
         path: "orders/history",
-        element: <HistoryPage />,
+        element: (
+          <ProtectedRoute redirectUrl="orders/history">
+            <HistoryPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
@@ -48,12 +59,10 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
       <Toaster />
-    </>
+    </QueryClientProvider>
   );
 }
 

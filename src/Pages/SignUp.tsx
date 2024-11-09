@@ -1,6 +1,6 @@
 import { FormEvent } from "react";
 import { flushSync } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import { useMutation } from "@tanstack/react-query";
 
@@ -21,7 +21,7 @@ export default function Page() {
     onSuccess: () => {
       document.startViewTransition(() => {
         flushSync(() => {
-          navigate("/catalog");
+          navigate("/");
         });
       });
     },
@@ -88,9 +88,18 @@ export default function Page() {
         placeholder="Please enter your password again"
       />
 
-      <Button disabled={isPending} type="submit">
-        Submit
-      </Button>
+      <div className="space-y-2.5">
+        <Button disabled={isPending} type="submit">
+          Sign Up
+        </Button>
+
+        <p className="text-xs tracking-wide text-center">
+          Already have an account?&nbsp;
+          <NavLink className="underline" to={"/login"}>
+            Log In
+          </NavLink>
+        </p>
+      </div>
     </Form>
   );
 }

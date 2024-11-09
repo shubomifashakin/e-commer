@@ -3,6 +3,7 @@ import { getUserInfo } from "../lib/data-service";
 import { UserInfo } from "../lib/type";
 import { InputGroup } from "../components/InputGroup";
 import Error from "../components/Error";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Page() {
   //fetch user info
@@ -11,18 +12,20 @@ export default function Page() {
     queryFn: getUserInfo,
   });
 
-  console.log(data);
-
   return (
-    <div>
-      {status === "pending" && <p>Loading...</p>}
+    <>
+      {status === "pending" && (
+        <div className="h-full flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      )}
 
       {status === "success" && <Profile data={data} />}
 
       {status === "error" && (
         <Error error={error} refetchFn={refetch} isFetching={isFetching} />
       )}
-    </div>
+    </>
   );
 }
 

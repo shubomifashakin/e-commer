@@ -1,7 +1,4 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useSession } from "../hooks/useSession";
 
 import { getOrderHistory } from "../lib/data-service";
 import { PastOrder } from "../lib/type";
@@ -9,22 +6,15 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import Pagination from "../components/Pagination";
 
 export default function Page() {
-  //gets the user session from the cookie
-  const [userInfo] = useSession();
-  const navigate = useNavigate();
-
   //fetches the first 5 past orders on mount and select only the latest fetched data
   const {
     data,
-    error,
     fetchNextPage,
     fetchPreviousPage,
     hasNextPage,
     hasPreviousPage,
     isFetching,
     status,
-    isError,
-    refetch,
   } = useInfiniteQuery({
     queryKey: ["history"],
 
@@ -52,19 +42,9 @@ export default function Page() {
     maxPages: 1,
   });
 
-  //if there is no userinfo go back to login
-  useEffect(
-    function () {
-      if (!userInfo) {
-        navigate("/login?redirect_url=orders/history");
-      }
-    },
-    [userInfo, navigate]
-  );
-
   //render them
   return (
-    <div className="h-dvh w-full flex items-center justify-center">
+    <div className="flex items-center w-full h-full justify-center">
       {status === "success" && (
         <div className="space-y-2 flex flex-col h-full w-full ">
           <Pagination
@@ -75,10 +55,18 @@ export default function Page() {
             fetchPreviousPage={fetchPreviousPage}
           />
 
-          <div className="flex-grow space-y-4 w-full py-8 px-48 flex-col items-center flex justify-center">
+          <div className="justify-center items-center flex w-full h-full py-8  ">
             {isFetching && <LoadingSpinner />}
 
-            {!isFetching && <PreviousOrdersList orders={data.previousOrders} />}
+            {!isFetching && (
+              <div className="grid grid-cols-3 self-baseline items-baseline gap-4 space-y-3">
+                <PreviousOrdersList orders={data.previousOrders} />
+              </div>
+            )}
+
+            {!isFetching && !data.previousOrders.length && (
+              <p className="text-sm">You have not ordered anything yet.</p>
+            )}
           </div>
         </div>
       )}
@@ -105,7 +93,7 @@ function PreviousOrdersList({ orders }: { orders: PastOrder[] }) {
               <p className="text-2xl font-bold">{item.product.name}</p>
 
               <p className="text-sm">
-                Ordered on : {new Date(item.created_at).toDateString()}
+                Ordered : {new Date(item.created_at).toDateString()}
               </p>
 
               <p className="text-sm">Quantity : {item.quantity}</p>

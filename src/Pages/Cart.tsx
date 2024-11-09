@@ -1,13 +1,11 @@
 import { FormEvent } from "react";
 import { flushSync } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-
-import { useSession } from "../hooks/useSession";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { cartStore } from "../lib/cartStore";
 import { CartItem, OrderItem } from "../lib/type";
-import { placeOrderFunction } from "../lib/data-service";
+import { getUserInfo, placeOrderFunction } from "../lib/data-service";
 
 import Button from "../components/Button";
 import { toast } from "react-hot-toast";
@@ -15,8 +13,11 @@ import { toast } from "react-hot-toast";
 export default function Page() {
   const navigate = useNavigate();
 
-  //gets the user session from the sessionstorage
-  const [userInfo] = useSession();
+  //fetches the users info
+  const { status } = useQuery({
+    queryKey: ["user-info"],
+    queryFn: getUserInfo,
+  });
 
   //gets all the items from the cart
   const { items, clearCart } = cartStore((state) => state);
@@ -50,7 +51,7 @@ export default function Page() {
     event.preventDefault();
 
     //if there is no userinfo, user should login
-    if (!userInfo) {
+    if (status !== "success") {
       navigate("/login?redirect_url=cart");
       return;
     }
@@ -69,7 +70,7 @@ export default function Page() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full  flex flex-col overflow-hidden "
+      className="w-full flex flex-col overflow-hidden"
     >
       <div className="py-4 px-10 w-full overflow-y-auto space-y-2">
         {items.length ? (
@@ -88,7 +89,7 @@ export default function Page() {
           </p>
         )}
 
-        {userInfo && (
+        {status === "success" && (
           <Link
             viewTransition
             className="text-xs underline text-center w-full block"
@@ -110,7 +111,7 @@ function Item({ item }: { item: CartItem }) {
   return (
     <div className="flex bg-secondary h-44 p-2 gap-x-4 w-full border rounded-sm">
       <div className="h-full rounded-sm overflow-hidden aspect-square">
-        <img alt="an image" className="object-cover h-full" src={item.image} />
+        <img alt={item.name} className="object-cover h-full" src={item.image} />
       </div>
 
       <div className="space-y-2">
