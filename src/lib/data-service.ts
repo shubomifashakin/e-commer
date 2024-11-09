@@ -10,7 +10,7 @@ import {
   HistoryResult,
 } from "./type";
 
-const origin = "http://localhost:3000";
+const origin = import.meta.env.ORIGIN as string;
 
 //getters
 export async function getUserInfo(): Promise<UserInfo> {
