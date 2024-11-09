@@ -10,7 +10,7 @@ import {
   HistoryResult,
 } from "./type";
 
-const origin = import.meta.env.ORIGIN as string;
+const origin = import.meta.env.VITE_ORIGIN as string;
 
 //getters
 export async function getUserInfo(): Promise<UserInfo> {
